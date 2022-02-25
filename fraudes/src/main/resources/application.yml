@@ -1,0 +1,15 @@
+server:
+  port: ${PORT:0}
+  servlet:
+    contextPath: /api/v1/rest-fraudes
+
+spring:
+  application:
+    name: api-fraudes
+
+eureka:
+  instance:
+    instanceId: ${spring.application.name}:${spring:application.instanceId:${random.value}}
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
