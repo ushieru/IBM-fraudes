@@ -3,9 +3,23 @@ server:
   servlet:
     contextPath: /api/v1/rest-fraudes
 
+fixer:
+  token:
+
 spring:
   application:
     name: api-fraudes
+  datasource:
+    username: sa
+    password: sa
+  h2:
+    console:
+      enabled: true
+  jpa:
+    showSql: true
+    hibernate:
+      dllAuto: create-drop
+    databsePlatform: org.hibernate.dialect.H"Dialect
 
 eureka:
   instance:
