@@ -7,15 +7,8 @@ import java.io.Serializable
 import javax.persistence.*
 
 @Entity
-@Setter
-@Getter
-@AllArgsConstructor
 @Table(name = "black_list_ip")
-class IP: Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long? = null
-
-    @Column(name = "ip", nullable = false)
-    private val ip: String? = null
-}
+class IP (
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) var id: Long? = null,
+    @Column(name = "ip", nullable = false) var ip: String
+)
