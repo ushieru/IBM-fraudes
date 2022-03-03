@@ -10,15 +10,9 @@ import org.springframework.stereotype.Service
 class CurrencyRateImpl @Autowired constructor(
     val fixerClient: FixerClient
 ): ICurrencyRate {
-    override fun getRate(token: String, currencyInfo: CurrencyInfo): CurrencyInfo {
-        val response = fixerClient.getEURRate(token, currencyInfo.code);
+    override fun getRate(token: String, codes: String): Map<String, Double> {
+        val response = fixerClient.getEURRate(token, codes);
         val rates = response["rates"] as Map<String, Double>;
-        val rate =  rates[currencyInfo.code] ?: 0.0
-        return CurrencyInfo(
-            currencyInfo.code,
-            currencyInfo.name,
-            currencyInfo.symbol,
-            rate.toString()
-        )
+        return rates
     }
 }
