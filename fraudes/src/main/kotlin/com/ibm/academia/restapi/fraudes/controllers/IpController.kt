@@ -2,7 +2,9 @@ package com.ibm.academia.restapi.fraudes.controllers
 
 import com.ibm.academia.restapi.fraudes.exceptions.BadRequest
 import com.ibm.academia.restapi.fraudes.exceptions.NotFoundException
+import com.ibm.academia.restapi.fraudes.models.dto.CurrencyInfo
 import com.ibm.academia.restapi.fraudes.models.dto.IPData
+import com.ibm.academia.restapi.fraudes.models.entities.IP
 import com.ibm.academia.restapi.fraudes.services.ICurrencyRate
 import com.ibm.academia.restapi.fraudes.services.IIPService
 import com.ibm.academia.restapi.fraudes.services.IPDAO
@@ -11,14 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 import org.springframework.core.env.Environment;
+import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/info")
+@RequestMapping("/")
 class IpController @Autowired constructor(
     @Qualifier(value = "IpServiceFeignService")
     private val ipServiceFeign: IIPService,
@@ -31,14 +30,22 @@ class IpController @Autowired constructor(
     @Autowired
     private val enviroment: Environment,
 ) {
-    @GetMapping("/{ip}")
+    @GetMapping("/info/{ip}")
     fun getIPInfo (@PathVariable("ip") ip: String): ResponseEntity<IPData> {
         val blackListIP = ipdao.findIPByIp(ip);
         if(blackListIP.isPresent) throw BadRequest("Ip en lista negra")
         val response = ipServiceFeign.getInfo(ip);
         if(response.name.isBlank() || response.countryCode.isBlank()) throw NotFoundException("IP no encontrada")
         val currencies = restCountries.getCurrencies(response.name);
-        val currenciesWithRate = currencies.map { currencyRate.getRate(enviroment.getRequiredProperty("fixer.token"), it) }
-        return ResponseEntity<IPData>(IPData(response, currenciesWithRate), HttpStatus.OK);
+        val currenciesCodes = currencies.joinToString(separator = ",") { it.code }
+        val rates = currencyRate.getRate(enviroment.getRequiredProperty("fixer.token"), currenciesCodes)
+        val currenciesWitRate = currencies.map { CurrencyInfo(it.code, it.name, it.symbol, rates[it.code].toString()) }
+        return ResponseEntity<IPData>(IPData(response, currenciesWitRate), HttpStatus.OK);
+    }
+
+    @PostMapping("/addBlackList")
+    fun postIP (@RequestBody ip: IP): ResponseEntity<IP> {
+        ipdao.save(ip)
+        return ResponseEntity<IP>(ip, HttpStatus.OK);
     }
 }
