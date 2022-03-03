@@ -14,7 +14,11 @@ Proyecto final de la academia **Spring Boot - Java 11**
 - Logs
 - Spring Boot Test
 
-End points:
+### Instructions:
+
+⚠️⚠️ add fixer token __fraudes.src.main.resources.application.yml__
+
+### End points:
 
 - GET
 
